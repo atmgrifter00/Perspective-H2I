@@ -1,0 +1,17 @@
+{
+  "name": "perspective-h2i",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@finos/perspective": "^2.10.1",
+    "@finos/perspective-viewer": "^2.10.1",
+    "@finos/perspective-viewer-d3fc": "^2.10.1",
+    "typescript": "^5.5.2"
+  }
+}
