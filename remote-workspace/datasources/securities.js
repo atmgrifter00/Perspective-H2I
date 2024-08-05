@@ -76,15 +76,15 @@ function newRows() {
         }
     }
 
-    // const samples = Float32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => Math.random() * 20 - 10) + (i / SAMPLE_SIZE * 10);
-    // const indices = Int32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i);
-    // const names = vectorFromArray(Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i.toString()));
-    // return tableFromArrays({
-    //     name: names,
-    //     sample: samples,
-    //     index: indices
-    // });
-    return rows;
+    const samples = Float32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => Math.random() * 20 - 10 + (i / SAMPLE_SIZE * 10));
+    const indices = Int32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i);
+    const names = vectorFromArray(Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i.toString()));
+    return tableFromArrays({
+        name: names,
+        sample: samples,
+        index: indices
+    });
+    // return rows;
 }
 
 async function init_dynamic({table_size, update_size, tick_rate}) {
