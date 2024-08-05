@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+    <style>
+      #app {
+        display: flex;
+        flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+      }
+
+      perspective-viewer {
+          flex: 1;
+          margin: 24px;
+      }
+  </style>
+</head>
+  <body>
+    <div id="app">
+      <perspective-viewer editable id="perspective-viewer"></perspective-viewer>
+    </div>
+  </body>
+</html>
