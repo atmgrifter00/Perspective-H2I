@@ -1,4 +1,4 @@
-import { tableFromArrays, vectorFromArray } from "apache-arrow";
+import { tableFromArrays, vectorFromArray, tableToIPC } from "apache-arrow";
 import perspective from "@finos/perspective";
 
 const worker = perspective.shared_worker
@@ -15,14 +15,14 @@ const CACHE_ENTRIES = 200;
 const UPDATE_SIZE = 50;
 
 // Update every N milliseconds
-const TICK_RATE = 30;
+const TICK_RATE = 10;
 
 // Size limit of the server-side table
-const TABLE_SIZE = 10000;
+const TABLE_SIZE = 100000;
 
 const CHANNELS = 4;
 
-const SAMPLE_SIZE = 20000;
+const SAMPLE_SIZE = 400;
 
 const SECURITIES = [
     "AAPL.N",
@@ -52,6 +52,11 @@ const CLIENTS = [
 ];
 
 const __CACHE__ = [];
+const sampleArrayBuffer = new ArrayBuffer(4*CHANNELS*SAMPLE_SIZE);
+const indexArrayBuffer = new ArrayBuffer(4*CHANNELS*SAMPLE_SIZE);
+const sampleBuffer = new Float32Array(sampleArrayBuffer);
+const indexBuffer = new Int32Array(indexArrayBuffer);
+const names = vectorFromArray(Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i.toString()));
 
 // perspective.initialize_profile_thread();
 
@@ -68,22 +73,23 @@ function newRows() {
     const rows = [];
     for (let i = 0; i < CHANNELS; i++) {
         for (let x = 0; x < SAMPLE_SIZE; x++) {
-            rows.push({
-                name: (i + 1).toString(),
-                sample: Math.random() * 20 - 10 + (i * 10),
-                index: x
-            });
+            sampleBuffer[i*SAMPLE_SIZE + x] = Math.random() * 20 - 10 + (x / SAMPLE_SIZE * 10);
+            indexBuffer[i*SAMPLE_SIZE + x] = x;
+            // rows.push({
+            //     sample: Math.random() * 20 - 10 + (i * 10),
+            //     index: x
+            // });
         }
     }
 
-    const samples = Float32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => Math.random() * 20 - 10 + (i / SAMPLE_SIZE * 10));
-    const indices = Int32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i);
-    const names = vectorFromArray(Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i.toString()));
-    return tableFromArrays({
+    // const samples = Float32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => Math.random() * 20 - 10 + (i / SAMPLE_SIZE * 10));
+    // const indices = Int32Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i);
+    // const names = vectorFromArray(Array.from({length: SAMPLE_SIZE * CHANNELS}, (_, i) => i.toString()));
+    return tableToIPC(tableFromArrays({
         name: names,
-        sample: samples,
-        index: indices
-    });
+        sample: sampleBuffer,
+        index: indexBuffer
+    }), 'stream').buffer;
     // return rows;
 }
 
@@ -94,7 +100,7 @@ async function init_dynamic({table_size, update_size, tick_rate}) {
         sample: "float",
         index: "integer"
     };
-    const table = await worker.table(schema, {limit: table_size});
+    const table = await worker.table(schema);
 
     // The `table` needs to be registered to a name with the Perspective
     // `WebSocketServer` in order for the client to get a proxy handle to it.
